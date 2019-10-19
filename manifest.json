@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Sideboard",
+  "description": "View your Pinboard bookmarks in a sidebar.",
+  "version": "1.0",
+  "applications": {
+    "gecko": {
+      "strict_min_version": "54.0a1"
+    }
+  },
+  "sidebar_action": {
+    "default_icon": "icons/pinboard.png",
+    "default_title": "Sideboard",
+    "default_panel": "sidebar/panel.html"
+  },
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "commands": {
+    "_execute_sidebar_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+P"
+      }
+    }
+  }
+}
