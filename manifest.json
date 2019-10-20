@@ -5,23 +5,16 @@
   "version": "1.0",
   "applications": {
     "gecko": {
-      "strict_min_version": "54.0a1"
+      "id": "krebs.maxine@gmail.com"
     }
   },
   "sidebar_action": {
     "default_icon": "icons/pinboard.png",
     "default_title": "Sideboard",
-    "default_panel": "sidebar/panel.html"
+    "default_panel": "sidebar/index.html"
   },
   "permissions": [
-    "storage",
-    "tabs"
-  ],
-  "commands": {
-    "_execute_sidebar_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+P"
-      }
-    }
-  }
+    "*://api.pinboard.in/*",
+    "storage"
+  ]
 }

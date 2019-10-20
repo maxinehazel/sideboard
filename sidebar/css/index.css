@@ -7,10 +7,8 @@ html, body {
 
 body {
   height: 90%;
-  font: caption;
-  background-color: #F4F7F8;
-}
-
-p {
+  font-family: "Fira Sans", Arial, Helvetica, sans-serif;
+  color: var(--white-100);
+  background-color: var(--grey-70);
   margin: 1em 2em;
 }
