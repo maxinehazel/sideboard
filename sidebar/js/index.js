@@ -2,16 +2,17 @@ var accessToken
 
 (async function () {
   accessToken = 'softpunk:D3B8053CA631C5166030'
-
-  if (postsUpdated() === true) {
+  var update = await postsUpdated()
+  if (update === true) {
+    console.log("fetched from pinboard.in")
     getAllPosts().then((posts) => {
-      storePosts(posts)
-      let gettingItem = browser.storage.local.get("posts");
-      gettingItem.then(updatePanel, onError);
+      storePosts(posts).then(function () {
+        browser.storage.local.get("posts").then(updatePanel, onError);
+      })
     }, onError)
   } else {
-    let gettingItem = browser.storage.local.get("posts");
-    gettingItem.then(updatePanel, onError);
+    console.log("fetched from local storage")
+    browser.storage.local.get("posts").then(updatePanel, onError);
   }
 })()
 
@@ -23,9 +24,19 @@ async function getAllPosts() {
   return json
 }
 
-function storePosts(posts) {
-  browser.storage.local.set({ posts })
-    .then(setItem, onError);
+async function getUpdatedTime() {
+  const url = 'https://api.pinboard.in/v1/posts/update?auth_token=' + accessToken + '&format=json';
+  const response = await fetch(url);
+  const json = await response.json();
+  return json
+}
+
+async function storePosts(posts) {
+  await browser.storage.local.set({ posts })
+    .then(function () {
+      console.log("OK")
+      return
+    }, onError);
 }
 
 function onError(error) {
@@ -40,6 +51,22 @@ function updatePanel(item) {
   console.log(item);
 }
 
-function postsUpdated() {
-  return true
+async function postsUpdated() {
+  var time = await getUpdatedTime()
+  return new Promise(resolve => {
+    var updatedTime = time.update_time
+    console.log("updated time: " + updatedTime)
+    browser.storage.local.get("updated_at").then(function (storedTime) {
+      console.log("stored time: " + storedTime.updated_at)
+      if (storedTime.updated_at === updatedTime) {
+        console.log("updated time not changed")
+        resolve(false)
+      } else {
+        console.log("updated time changed")
+        browser.storage.local.set({ "updated_at": updatedTime })
+          .then(setItem, onError);
+        resolve(true)
+      }
+    }, onError);
+  })
 }
