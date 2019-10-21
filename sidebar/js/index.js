@@ -1,21 +1,20 @@
 var accessToken
 
+const accessTokenNotFound = "<p>Configure API Token in the extension options on the about:addons page.</p>";
+
 (async function () {
-  accessToken = 'softpunk:D3B8053CA631C5166030'
+  accessToken = await getAccessToken()
   var update = await postsUpdated()
   if (update === true) {
-    console.log("fetched from pinboard.in")
     getAllPosts().then((posts) => {
       storePosts(posts).then(function () {
-        browser.storage.local.get("posts").then(updatePanel, onError);
+        browser.storage.sync.get().then(updatePanel, onError);
       })
     }, onError)
   } else {
-    console.log("fetched from local storage")
-    browser.storage.local.get("posts").then(updatePanel, onError);
+    browser.storage.sync.get().then(updatePanel, onError);
   }
 })()
-
 
 async function getAllPosts() {
   const url = 'https://api.pinboard.in/v1/posts/all?auth_token=' + accessToken + '&format=json';
@@ -32,11 +31,70 @@ async function getUpdatedTime() {
 }
 
 async function storePosts(posts) {
-  await browser.storage.local.set({ posts })
+  var formattedPosts = arrangePostsByTag(posts)
+  await browser.storage.sync.set({ "posts": formattedPosts })
     .then(function () {
-      console.log("OK")
       return
     }, onError);
+}
+
+function updatePanel(meta) {
+  var posts = meta.posts
+  console.log(posts)
+  document.getElementById("list").innerHTML = "Test"
+}
+
+async function postsUpdated() {
+  var time = await getUpdatedTime()
+  return new Promise(resolve => {
+    var updatedTime = time.update_time
+    browser.storage.sync.get("updated_at").then(function (storedTime) {
+      if (storedTime.updated_at === updatedTime) {
+        resolve(false)
+      } else {
+        browser.storage.sync.set({ "updated_at": updatedTime })
+          .then(setItem, onError);
+        resolve(true)
+      }
+    }, onError);
+  })
+}
+
+function arrangePostsByTag(posts) {
+  var postsByTags = new Object()
+  postsByTags.untagged = Array()
+  for (var x = 0; x < posts.length; x++) {
+    post = posts[x]
+    if (post.tags === "") {
+      postsByTags.untagged.push(post)
+    } else {
+      var tagList = post.tags
+      var tags = tagList.split(' ');
+      for (var y = 0; y < tags.length; y++) {
+        var tag = tags[y]
+        if (tag in postsByTags) {
+          postsByTags[tag].push(post)
+        } else {
+          postsByTags[tag] = Array()
+          postsByTags[tag].push(post)
+        }
+      }
+    }
+  }
+  return postsByTags
+}
+
+async function getAccessToken() {
+  return new Promise(resolve => {
+    browser.storage.sync.get("pinboard_access_token").then(function (storedToken) {
+      if (storedToken.pinboard_access_token === undefined) {
+        document.getElementById("list").innerHTML = accessTokenNotFound;
+        resolve(undefined)
+      } else {
+        resolve(storedToken.pinboard_access_token)
+      }
+    }, onError);
+  })
 }
 
 function onError(error) {
@@ -45,28 +103,4 @@ function onError(error) {
 
 function setItem() {
   console.log("OK");
-}
-
-function updatePanel(item) {
-  console.log(item);
-}
-
-async function postsUpdated() {
-  var time = await getUpdatedTime()
-  return new Promise(resolve => {
-    var updatedTime = time.update_time
-    console.log("updated time: " + updatedTime)
-    browser.storage.local.get("updated_at").then(function (storedTime) {
-      console.log("stored time: " + storedTime.updated_at)
-      if (storedTime.updated_at === updatedTime) {
-        console.log("updated time not changed")
-        resolve(false)
-      } else {
-        console.log("updated time changed")
-        browser.storage.local.set({ "updated_at": updatedTime })
-          .then(setItem, onError);
-        resolve(true)
-      }
-    }, onError);
-  })
 }

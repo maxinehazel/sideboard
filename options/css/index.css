@@ -1,16 +1,9 @@
-html, body {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  box-sizing: border-box;
-}
-
 body {
   height: 90%;
   font-family: "Fira Sans", Arial, Helvetica, sans-serif;
   color: var(--white-100);
-  background-color: var(--grey-70);
-  padding: 0.5em;
+  background-color: var(--grey-80);
+  margin: 1em 2em;
 }
 
 a {

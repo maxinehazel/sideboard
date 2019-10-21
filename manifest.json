@@ -5,13 +5,16 @@
   "version": "1.0",
   "applications": {
     "gecko": {
-      "id": "krebs.maxine@gmail.com"
+      "id": "sideboard@maxinekrebs.dev"
     }
   },
   "sidebar_action": {
     "default_icon": "icons/pinboard.png",
     "default_title": "Sideboard",
     "default_panel": "sidebar/index.html"
+  },
+  "options_ui": {
+    "page": "options/index.html"
   },
   "permissions": [
     "*://api.pinboard.in/*",
