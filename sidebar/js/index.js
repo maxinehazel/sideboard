@@ -40,8 +40,19 @@ async function storePosts(posts) {
 
 function updatePanel(meta) {
   var posts = meta.posts
-  console.log(posts)
-  document.getElementById("list").innerHTML = "Test"
+  var html = postHTML(posts)
+  document.getElementById("list").innerHTML = html
+}
+
+function postHTML(posts) {
+  var html = `<ul>`
+  for (var tag in posts) {
+    html += `
+      <li>${tag}</li>
+    `
+  }
+  html += `</ul>`
+  return html
 }
 
 async function postsUpdated() {
