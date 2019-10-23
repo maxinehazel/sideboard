@@ -45,11 +45,17 @@ function updatePanel(meta) {
 }
 
 function postHTML(posts) {
-  var html = `<ul>`
+  var html = `<ul id="tagMenu" class="collapseMenu">`
   for (var tag in posts) {
-    html += `
-      <li>${tag}</li>
-    `
+    html += `<li><a class="collapsed" href="#">${tag}</a>`
+    html += `<ul>`
+    var postList = posts[tag]
+    for (var x = 0; x < postList.length; x++) {
+      var post = postList[x]
+      html += `<li><a href="${post.href}">${post.description}</a></li>`
+    }
+    html += `</ul>`
+    html += `</li>`
   }
   html += `</ul>`
   return html
@@ -106,6 +112,11 @@ async function getAccessToken() {
       }
     }, onError);
   })
+}
+
+
+function oncClick() {
+  console.log("test")
 }
 
 function onError(error) {
