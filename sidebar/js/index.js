@@ -8,11 +8,11 @@ const accessTokenNotFound = "<p>Configure API Token in the extension options on 
   if (update === true) {
     getAllPosts().then((posts) => {
       storePosts(posts).then(function () {
-        browser.storage.sync.get().then(updatePanel, onError);
+        browser.storage.local.get().then(updatePanel, onError);
       })
     }, onError)
   } else {
-    browser.storage.sync.get().then(updatePanel, onError);
+    browser.storage.local.get().then(updatePanel, onError);
   }
 })()
 
@@ -32,7 +32,7 @@ async function getUpdatedTime() {
 
 async function storePosts(posts) {
   var formattedPosts = arrangePostsByTag(posts)
-  await browser.storage.sync.set({ "posts": formattedPosts })
+  await browser.storage.local.set({ "posts": formattedPosts })
     .then(function () {
       return
     }, onError);
@@ -42,13 +42,23 @@ function updatePanel(meta) {
   var posts = meta.posts
   var html = postHTML(posts)
   document.getElementById("list").innerHTML = html
+  var toggler = document.getElementsByClassName("caret");
+  var i;
+
+  for (i = 0; i < toggler.length; i++) {
+    toggler[i].addEventListener("click", function () {
+      this.parentElement.querySelector(".nested").classList.toggle("active");
+      this.classList.toggle("caret-down");
+    });
+  }
+
 }
 
 function postHTML(posts) {
-  var html = `<ul id="tagMenu" class="collapseMenu">`
+  var html = `<ul id="tagMenu">`
   for (var tag in posts) {
-    html += `<li><a class="collapsed" href="#">${tag}</a>`
-    html += `<ul>`
+    html += `<li><span class="caret"><a href="#">${tag}</a></span>`
+    html += `<ul class="nested">`
     var postList = posts[tag]
     for (var x = 0; x < postList.length; x++) {
       var post = postList[x]
@@ -65,11 +75,11 @@ async function postsUpdated() {
   var time = await getUpdatedTime()
   return new Promise(resolve => {
     var updatedTime = time.update_time
-    browser.storage.sync.get("updated_at").then(function (storedTime) {
+    browser.storage.local.get("updated_at").then(function (storedTime) {
       if (storedTime.updated_at === updatedTime) {
         resolve(false)
       } else {
-        browser.storage.sync.set({ "updated_at": updatedTime })
+        browser.storage.local.set({ "updated_at": updatedTime })
           .then(setItem, onError);
         resolve(true)
       }
