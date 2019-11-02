@@ -41,7 +41,7 @@ async function storePosts(posts) {
 function updatePanel(meta) {
   var posts = meta.posts
   var html = postHTML(posts)
-  document.getElementById("list").innerHTML = html
+  appendToDom(html)
   var toggler = document.getElementsByClassName("caret");
   var i;
 
@@ -51,13 +51,12 @@ function updatePanel(meta) {
       this.classList.toggle("caret-down");
     });
   }
-
 }
 
 function postHTML(posts) {
   var html = `<ul id="tagMenu">`
   for (var tag in posts) {
-    html += `<li><span class="caret"><a href="#">${tag}</a></span>`
+    html += `<li><span class="caret"><a>${tag}</a></span>`
     html += `<ul class="nested">`
     var postList = posts[tag]
     for (var x = 0; x < postList.length; x++) {
@@ -115,13 +114,24 @@ async function getAccessToken() {
   return new Promise(resolve => {
     browser.storage.sync.get("pinboard_access_token").then(function (storedToken) {
       if (storedToken.pinboard_access_token === undefined) {
-        document.getElementById("list").innerHTML = accessTokenNotFound;
+        appendToDom(accessTokenNotFound)
         resolve(undefined)
       } else {
         resolve(storedToken.pinboard_access_token)
       }
     }, onError);
   })
+}
+
+function appendToDom(html) {
+  const parser = new DOMParser()
+  const parsed = parser.parseFromString(html, `text/html`)
+  const tags = parsed.getElementsByTagName(`body`)
+
+  document.body.innerHTML = ``
+  for (const tag of tags) {
+    document.body.appendChild(tag)
+  }
 }
 
 
